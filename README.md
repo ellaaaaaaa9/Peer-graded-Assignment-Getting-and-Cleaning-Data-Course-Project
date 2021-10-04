@@ -1,217 +1,199 @@
-# Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta content='IE=edge' http-equiv='X-UA-Compatible'>
-<meta content='width=800' name='viewport'>
-<title>RPubs - Peer-graded Assignment: Getting and Cleaning Data Course Project</title>
-<meta name="csrf-param" content="authenticity_token" />
-<meta name="csrf-token" content="/Wf1cK13LmtgkNrm5WasVuz5JaU5sB2oErVNOry2AOSzpOGrJ7UWZHoV5mONhALOOQOGhw8Ws7nDzf24JzknhQ==" />
-<link rel="stylesheet" media="all" href="/assets/application-db3d8f9490de0f0058decd5613b51469ee8c3214db95ce7e0bd47355e96429eb.css" />
-<link rel="stylesheet" media="all" href="/assets/pub/show-58702f9d9025877672e50953d29b220ea08ef2b5acac46cef96fb9182e555801.css" />
-<script src="/assets/application-050918065a747f23455921e989643a0f9050e5da8573c9858fc4266f0ec88af2.js"></script>
-<link rel="stylesheet" href="https://use.typekit.net/tzi3tjz.css">
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-  ga('create', 'UA-20375833-3', 'auto', {'allowLinker': true});
-  ga('require', 'linker');
-  ga('linker:autoLink', ['rstudio.com', 'rstudio.github.io', 'rviews.rstudio.com', 'community.rstudio.com', 'rpubs.rstudio.com', 'environments.rstudio.com', 'rstudio.org', 'dailies.rstudio.com', 'pages.rstudio.com', 'db.rstudio.com', 'solutions.rstudio.com', 'docs.rstudio.com', 'spark.rstudio.com', 'shiny.rstudio.com', 'education.rstudio.com', 'rstudio.cloud', 'shinyapps.io', 'teamadmin.rstudio.com', 'blog.rstudio.com', 'support.rstudio.com'] );
-  ga('send', 'pageview');
-</script>
+Loading required packages
 
-</head>
-<body class='show-pub show-toolbars'>
-<div class='modal' id='login' style='display: none'>
-<div class='modal-header'>
-<h1>Sign In</h1>
-</div>
-<div class='modal-body'>
-<div class='alert' id='login_message' style='display: none'></div>
-<form action="/auth/login" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="/iCC63pwIQrRtmei3zjjQdi4adpUceqOcfiCGLMApeENEdOTVyh7xEYx6iyCJ7SwnM0zxhmJgohhWFkmuK0SSA==" />
-<input name='return_url' type='hidden'>
-<div class='fieldset'>
-<div class='control-group'>
-<label class='control-label' for='login_username'>Username or Email</label>
-<div class='controls'>
-<input class='input-xlarge' id='login_username' name='username' type='text'>
-</div>
-</div>
-<div class='control-group'>
-<label class='control-label' for='login_password'>Password</label>
-<div class='controls'>
-<input class='input-xlarge' id='login_password' name='password' type='password'>
-</div>
-</div>
-<div class='control-group'>
-<a href='/auth/passwordhelp' target='_blank'>Forgot your password?</a>
-</div>
-</div>
-</form>
+library(dplyr)
+
+Download the dataset
+
+filename <- "Coursera_DS3_Final.zip"
+
+# Checking if archieve already exists.
+if (!file.exists(filename)){
+  fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+  download.file(fileURL, filename, method="curl")
+}  
+
+# Checking if folder exists
+if (!file.exists("UCI HAR Dataset")) { 
+  unzip(filename) 
+}
+
+Assigning all data frames
+
+features <- read.table("UCI HAR Dataset/features.txt", col.names = c("n","functions"))
+activities <- read.table("UCI HAR Dataset/activity_labels.txt", col.names = c("code", "activity"))
+subject_test <- read.table("UCI HAR Dataset/test/subject_test.txt", col.names = "subject")
+x_test <- read.table("UCI HAR Dataset/test/X_test.txt", col.names = features$functions)
+y_test <- read.table("UCI HAR Dataset/test/y_test.txt", col.names = "code")
+subject_train <- read.table("UCI HAR Dataset/train/subject_train.txt", col.names = "subject")
+x_train <- read.table("UCI HAR Dataset/train/X_train.txt", col.names = features$functions)
+y_train <- read.table("UCI HAR Dataset/train/y_train.txt", col.names = "code")
 
 
-</div>
-<div class='modal-footer'>
-<button class='btn btn-primary' id='login-modal-submit'>Sign In</button>
-<button class='btn' id='login-modal-cancel'>Cancel</button>
-</div>
-</div>
-<div class='navbar-inner' id='pageheader'>
-<div id='branding'>
-<h1 id='logo'>
-<a href='/'><span id='R'>R</span>Pubs
-</a>
-</h1>
-<span id='tagline'>by RStudio</span>
-</div>
-<div id='identity'>
-<div class='btn-group pull-right'>
-<a class='btn btn-inverse btn-small dropdown-toggle' data-toggle='dropdown' href='#'>
-<img src="https://secure.gravatar.com/avatar/396d681673767a34d78134009351fdb8?s=14" class="gravatar" alt="gravatar" style="width: 14px; height: 14px"/>
-&nbsp;ellagfr
-<span class='caret'></span>
-</a>
-<ul class='dropdown-menu'>
-<li><a href="/ellagfr">View profile</a></li>
-<li><a href="/profile/edit">Edit profile</a></li>
-<li><a href="/profile/setpass">Change password</a></li>
-<li class='divider'></li>
-<li><a onclick="rpubs_logout(); return false;" href="#">Sign out</a></li>
-</ul>
-</div>
-</div>
-</div>
-<div id='pagebody'>
-<div id='payload'>
-<iframe src='//rstudio-pubs-static.s3.amazonaws.com/407555_03495ae8d77f4e73a1ff798026d6b174.html'></iframe>
-<button class='btn btn-tiny' id='btn-show-toolbars'>
-<i class='icon-resize-small'></i>
-</button>
-</div>
-<div class='navbar navbar-fixed-bottom' id='pagefooter'>
-<div class='navbar-inner'>
-<div class='container-fluid'>
-<ul class='nav' id='pubmeta'>
-<li id='pubtitle'>
-<label>Peer-graded Assignment: Getting and Cleaning Data Course Project</label>
-</li>
-<li id='pubauthor'>
-<a href="https://rpubs.com/ninjazzle">by Nunno Nugroho</a>
-</li>
-<li id='pubtime'>
-<label>
-Last updated
-<time datetime='2018-07-26T03:54:57+00:00'>about 3 years ago</time>
-</label>
-</li>
-</ul>
-<ul class='nav pull-right'>
-<li>
-<button class='btn btn-small btn-success' id='btn-comments'>
-<i class='icon-comment icon-white'></i>
-<span id='comment-verb-hide'>
-Hide
-</span>
-Comments
-<span id='comment-count'>
-(&ndash;)
-</span>
-</button>
-<button class='btn btn-small btn-info' id='btn-share'>
-<i class='icon-share icon-white'></i>
-Share
-</button>
-<button class='btn btn-small btn-inverse' id='btn-hide-toolbars'>
-Hide Toolbars
-</button>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class='modal hide' id='modal-share'>
-<div class='modal-body'>
-<btn class='close' data-dismiss='modal' type='button'>×</btn>
-<h2 class='first'>Post on:</h2>
-<p>
-<a class='btn btn-primary btn-large' href='https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Frpubs.com%2Fninjazzle%2FDS-JHU-3-4-Final&amp;source=tweetbutton&amp;text=Peer-graded%20Assignment%3A%20Getting%20and%20Cleaning%20Data%20Course%20Project&amp;url=http%3A%2F%2Frpubs.com%2Fninjazzle%2FDS-JHU-3-4-Final' onclick='window.open(this.href, &#39;&#39;, &#39;menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=275,width=660&#39;);return false;'>
-Twitter
-</a>
-<a class='btn btn-primary btn-large' href='https://www.facebook.com/sharer.php?u=http%3A%2F%2Frpubs.com%2Fninjazzle%2FDS-JHU-3-4-Final&amp;t=Peer-graded%20Assignment%3A%20Getting%20and%20Cleaning%20Data%20Course%20Project' onclick='window.open(this.href, &#39;&#39;, &#39;menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=350,width=660&#39;);return false;'>
-Facebook
-</a>
-<a class='btn btn-primary btn-large' href='https://plus.google.com/share?url=http%3A%2F%2Frpubs.com%2Fninjazzle%2FDS-JHU-3-4-Final' onclick='window.open(this.href, &#39;&#39;, &#39;menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600&#39;);return false;'>
-Google+
-</a>
-</p>
-<hr>
-<h3>Or copy &amp; paste this link into an email or IM:</h3>
-<input onclick='this.select()' readonly='readonly' value='http://rpubs.com/ninjazzle/DS-JHU-3-4-Final'>
-</div>
-</div>
-<script>
-  $('#btn-edit').click(function() {
-    location.href = "/ninjazzle/407555/edit";
-  });
-  $('#btn-delete').mouseover(function() {
-    $('#btn-delete').removeClass('btn-inverse').addClass('btn-danger');
-  });
-  $('#btn-delete').mouseout(function() {
-    $('#btn-delete').addClass('btn-inverse').removeClass('btn-danger');
-  });
-  $('#btn-hide-toolbars').click(function() {
-    $(document.body).addClass('hide-toolbars');
-    $(document.body).removeClass('show-toolbars');
-  });
-  $('#btn-show-toolbars').click(function() {
-    $(document.body).addClass('show-toolbars');
-    $(document.body).removeClass('hide-toolbars');
-  });
-  $('#btn-share').click(function() {
-    $('#modal-share').modal().css({
-      'margin-left': function () {
-        return -($(this).width() / 2);
-      }
-    });
-  });
-  $('#btn-comments').click(function() {
-    $(document.body).toggleClass('show-comments');
-  });
-  setInterval(function() {
-    // Poll for comment count. Barf.
-    var text = $('#dsq-num-posts').text();
-    if (text && /^\d+$/.test(text))
-      $('#comment-count').text('(' + text + ')');
-  }, 1000);
-</script>
-<div id='comment-wrapper'>
-<div id='disqus_thread'>
-<script>
-  var disqus_config = function () {
-      // The generated payload which authenticates users with Disqus
-      this.page.remote_auth_s3 = 'eyJpZCI6InJwdWJzLTM2NDIzNSIsInVzZXJuYW1lIjoiZWxsYWdmciIsImVtYWlsIjoiYmxvbXN0ZWVyZmVAZ21haWwuY29tIiwiYXZhdGFyIjoiaHR0cHM6Ly9zZWN1cmUuZ3JhdmF0YXIuY29tL2F2YXRhci8zOTZkNjgxNjczNzY3YTM0ZDc4MTM0MDA5MzUxZmRiOD9zPTY0IiwidXJsIjoiIn0= be0fb2db7986a501b40f473ee83d99fc3b998f1a 1633313841';
-      this.page.author_s3 = 'eyJ1c2VybmFtZSI6InJwdWJzLTE0MjM1MyJ9 62ddd60091fc1a44c8f4f7c7e095771456c4afcc 1633313841';
-      this.page.api_key = '7NhtlDm2Hf3z44e8I6PRkOLIwe9o1U0rVepc4PMzqwnADLCB3JhMdX7ZUPbnl85p';
-  };
-</script>
-<script>
-  var disqus_shortname = 'rpubs'; // required: replace example with your forum shortname
-  var disqus_identifier = 'pub-407555';
-  var disqus_developer = 1;
-  
-  /* * * DON'T EDIT BELOW THIS LINE * * */
-  (function() {
-    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-  })();
-</script>
-</div>
-</div>
+The “Go for it!” Stage
+“You should create one R script called run_analysis.R that does the following:”
 
-</div>
-</body>
-</html>
+
+
+Step 1: Merges the training and the test sets to create one data set.
+
+X <- rbind(x_train, x_test)
+Y <- rbind(y_train, y_test)
+Subject <- rbind(subject_train, subject_test)
+Merged_Data <- cbind(Subject, Y, X)
+
+
+Step 2: Extracts only the measurements on the mean and standard deviation for each measurement.
+
+TidyData <- Merged_Data %>% select(subject, code, contains("mean"), contains("std"))
+
+
+Step 3: Uses descriptive activity names to name the activities in the data set.
+
+TidyData$code <- activities[TidyData$code, 2]
+
+
+Step 4: Appropriately labels the data set with descriptive variable names.
+
+names(TidyData)[2] = "activity"
+names(TidyData)<-gsub("Acc", "Accelerometer", names(TidyData))
+names(TidyData)<-gsub("Gyro", "Gyroscope", names(TidyData))
+names(TidyData)<-gsub("BodyBody", "Body", names(TidyData))
+names(TidyData)<-gsub("Mag", "Magnitude", names(TidyData))
+names(TidyData)<-gsub("^t", "Time", names(TidyData))
+names(TidyData)<-gsub("^f", "Frequency", names(TidyData))
+names(TidyData)<-gsub("tBody", "TimeBody", names(TidyData))
+names(TidyData)<-gsub("-mean()", "Mean", names(TidyData), ignore.case = TRUE)
+names(TidyData)<-gsub("-std()", "STD", names(TidyData), ignore.case = TRUE)
+names(TidyData)<-gsub("-freq()", "Frequency", names(TidyData), ignore.case = TRUE)
+names(TidyData)<-gsub("angle", "Angle", names(TidyData))
+names(TidyData)<-gsub("gravity", "Gravity", names(TidyData))
+
+
+Step 5: From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+FinalData <- TidyData %>%
+    group_by(subject, activity) %>%
+    summarise_all(funs(mean))
+write.table(FinalData, "FinalData.txt", row.name=FALSE)
+
+
+Final Check Stage
+
+Checking variable names
+
+str(FinalData)
+Classes grouped_df, tbl_df, tbl and 'data.frame': 180 obs. of  88 variables:
+ $ subject                                           : int  1 1 1 1 1 1 2 2 2 2 ...
+ $ activity                                          : Factor w/ 6 levels "LAYING","SITTING",..: 1 2 3 4 5 6 1 2 3 4 ...
+ $ TimeBodyAccelerometer.mean...X                    : num  0.222 0.261 0.279 0.277 0.289 ...
+ $ TimeBodyAccelerometer.mean...Y                    : num  -0.04051 -0.00131 -0.01614 -0.01738 -0.00992 ...
+ $ TimeBodyAccelerometer.mean...Z                    : num  -0.113 -0.105 -0.111 -0.111 -0.108 ...
+ $ TimeGravityAccelerometer.mean...X                 : num  -0.249 0.832 0.943 0.935 0.932 ...
+ $ TimeGravityAccelerometer.mean...Y                 : num  0.706 0.204 -0.273 -0.282 -0.267 ...
+ $ TimeGravityAccelerometer.mean...Z                 : num  0.4458 0.332 0.0135 -0.0681 -0.0621 ...
+ $ TimeBodyAccelerometerJerk.mean...X                : num  0.0811 0.0775 0.0754 0.074 0.0542 ...
+ $ TimeBodyAccelerometerJerk.mean...Y                : num  0.003838 -0.000619 0.007976 0.028272 0.02965 ...
+ $ TimeBodyAccelerometerJerk.mean...Z                : num  0.01083 -0.00337 -0.00369 -0.00417 -0.01097 ...
+ $ TimeBodyGyroscope.mean...X                        : num  -0.0166 -0.0454 -0.024 -0.0418 -0.0351 ...
+ $ TimeBodyGyroscope.mean...Y                        : num  -0.0645 -0.0919 -0.0594 -0.0695 -0.0909 ...
+ $ TimeBodyGyroscope.mean...Z                        : num  0.1487 0.0629 0.0748 0.0849 0.0901 ...
+ $ TimeBodyGyroscopeJerk.mean...X                    : num  -0.1073 -0.0937 -0.0996 -0.09 -0.074 ...
+ $ TimeBodyGyroscopeJerk.mean...Y                    : num  -0.0415 -0.0402 -0.0441 -0.0398 -0.044 ...
+ $ TimeBodyGyroscopeJerk.mean...Z                    : num  -0.0741 -0.0467 -0.049 -0.0461 -0.027 ...
+ $ TimeBodyAccelerometerMagnitude.mean..             : num  -0.8419 -0.9485 -0.9843 -0.137 0.0272 ...
+ $ TimeGravityAccelerometerMagnitude.mean..          : num  -0.8419 -0.9485 -0.9843 -0.137 0.0272 ...
+ $ TimeBodyAccelerometerJerkMagnitude.mean..         : num  -0.9544 -0.9874 -0.9924 -0.1414 -0.0894 ...
+ $ TimeBodyGyroscopeMagnitude.mean..                 : num  -0.8748 -0.9309 -0.9765 -0.161 -0.0757 ...
+ $ TimeBodyGyroscopeJerkMagnitude.mean..             : num  -0.963 -0.992 -0.995 -0.299 -0.295 ...
+ $ FrequencyBodyAccelerometer.mean...X               : num  -0.9391 -0.9796 -0.9952 -0.2028 0.0382 ...
+ $ FrequencyBodyAccelerometer.mean...Y               : num  -0.86707 -0.94408 -0.97707 0.08971 0.00155 ...
+ $ FrequencyBodyAccelerometer.mean...Z               : num  -0.883 -0.959 -0.985 -0.332 -0.226 ...
+ $ FrequencyBodyAccelerometer.meanFreq...X           : num  -0.1588 -0.0495 0.0865 -0.2075 -0.3074 ...
+ $ FrequencyBodyAccelerometer.meanFreq...Y           : num  0.0975 0.0759 0.1175 0.1131 0.0632 ...
+ $ FrequencyBodyAccelerometer.meanFreq...Z           : num  0.0894 0.2388 0.2449 0.0497 0.2943 ...
+ $ FrequencyBodyAccelerometerJerk.mean...X           : num  -0.9571 -0.9866 -0.9946 -0.1705 -0.0277 ...
+ $ FrequencyBodyAccelerometerJerk.mean...Y           : num  -0.9225 -0.9816 -0.9854 -0.0352 -0.1287 ...
+ $ FrequencyBodyAccelerometerJerk.mean...Z           : num  -0.948 -0.986 -0.991 -0.469 -0.288 ...
+ $ FrequencyBodyAccelerometerJerk.meanFreq...X       : num  0.132 0.257 0.314 -0.209 -0.253 ...
+ $ FrequencyBodyAccelerometerJerk.meanFreq...Y       : num  0.0245 0.0475 0.0392 -0.3862 -0.3376 ...
+ $ FrequencyBodyAccelerometerJerk.meanFreq...Z       : num  0.02439 0.09239 0.13858 -0.18553 0.00937 ...
+ $ FrequencyBodyGyroscope.mean...X                   : num  -0.85 -0.976 -0.986 -0.339 -0.352 ...
+ $ FrequencyBodyGyroscope.mean...Y                   : num  -0.9522 -0.9758 -0.989 -0.1031 -0.0557 ...
+ $ FrequencyBodyGyroscope.mean...Z                   : num  -0.9093 -0.9513 -0.9808 -0.2559 -0.0319 ...
+ $ FrequencyBodyGyroscope.meanFreq...X               : num  -0.00355 0.18915 -0.12029 0.01478 -0.10045 ...
+ $ FrequencyBodyGyroscope.meanFreq...Y               : num  -0.0915 0.0631 -0.0447 -0.0658 0.0826 ...
+ $ FrequencyBodyGyroscope.meanFreq...Z               : num  0.010458 -0.029784 0.100608 0.000773 -0.075676 ...
+ $ FrequencyBodyAccelerometerMagnitude.mean..        : num  -0.8618 -0.9478 -0.9854 -0.1286 0.0966 ...
+ $ FrequencyBodyAccelerometerMagnitude.meanFreq..    : num  0.0864 0.2367 0.2846 0.1906 0.1192 ...
+ $ FrequencyBodyAccelerometerJerkMagnitude.mean..    : num  -0.9333 -0.9853 -0.9925 -0.0571 0.0262 ...
+ $ FrequencyBodyAccelerometerJerkMagnitude.meanFreq..: num  0.2664 0.3519 0.4222 0.0938 0.0765 ...
+ $ FrequencyBodyGyroscopeMagnitude.mean..            : num  -0.862 -0.958 -0.985 -0.199 -0.186 ...
+ $ FrequencyBodyGyroscopeMagnitude.meanFreq..        : num  -0.139775 -0.000262 -0.028606 0.268844 0.349614 ...
+ $ FrequencyBodyGyroscopeJerkMagnitude.mean..        : num  -0.942 -0.99 -0.995 -0.319 -0.282 ...
+ $ FrequencyBodyGyroscopeJerkMagnitude.meanFreq..    : num  0.176 0.185 0.334 0.191 0.19 ...
+ $ Angle.TimeBodyAccelerometerMean.Gravity.          : num  0.021366 0.027442 -0.000222 0.060454 -0.002695 ...
+ $ Angle.TimeBodyAccelerometerJerkMean..GravityMean. : num  0.00306 0.02971 0.02196 -0.00793 0.08993 ...
+ $ Angle.TimeBodyGyroscopeMean.GravityMean.          : num  -0.00167 0.0677 -0.03379 0.01306 0.06334 ...
+ $ Angle.TimeBodyGyroscopeJerkMean.GravityMean.      : num  0.0844 -0.0649 -0.0279 -0.0187 -0.04 ...
+ $ Angle.X.GravityMean.                              : num  0.427 -0.591 -0.743 -0.729 -0.744 ...
+ $ Angle.Y.GravityMean.                              : num  -0.5203 -0.0605 0.2702 0.277 0.2672 ...
+ $ Angle.Z.GravityMean.                              : num  -0.3524 -0.218 0.0123 0.0689 0.065 ...
+ $ TimeBodyAccelerometer.std...X                     : num  -0.928 -0.977 -0.996 -0.284 0.03 ...
+ $ TimeBodyAccelerometer.std...Y                     : num  -0.8368 -0.9226 -0.9732 0.1145 -0.0319 ...
+ $ TimeBodyAccelerometer.std...Z                     : num  -0.826 -0.94 -0.98 -0.26 -0.23 ...
+ $ TimeGravityAccelerometer.std...X                  : num  -0.897 -0.968 -0.994 -0.977 -0.951 ...
+ $ TimeGravityAccelerometer.std...Y                  : num  -0.908 -0.936 -0.981 -0.971 -0.937 ...
+ $ TimeGravityAccelerometer.std...Z                  : num  -0.852 -0.949 -0.976 -0.948 -0.896 ...
+ $ TimeBodyAccelerometerJerk.std...X                 : num  -0.9585 -0.9864 -0.9946 -0.1136 -0.0123 ...
+ $ TimeBodyAccelerometerJerk.std...Y                 : num  -0.924 -0.981 -0.986 0.067 -0.102 ...
+ $ TimeBodyAccelerometerJerk.std...Z                 : num  -0.955 -0.988 -0.992 -0.503 -0.346 ...
+ $ TimeBodyGyroscope.std...X                         : num  -0.874 -0.977 -0.987 -0.474 -0.458 ...
+ $ TimeBodyGyroscope.std...Y                         : num  -0.9511 -0.9665 -0.9877 -0.0546 -0.1263 ...
+ $ TimeBodyGyroscope.std...Z                         : num  -0.908 -0.941 -0.981 -0.344 -0.125 ...
+ $ TimeBodyGyroscopeJerk.std...X                     : num  -0.919 -0.992 -0.993 -0.207 -0.487 ...
+ $ TimeBodyGyroscopeJerk.std...Y                     : num  -0.968 -0.99 -0.995 -0.304 -0.239 ...
+ $ TimeBodyGyroscopeJerk.std...Z                     : num  -0.958 -0.988 -0.992 -0.404 -0.269 ...
+ $ TimeBodyAccelerometerMagnitude.std..              : num  -0.7951 -0.9271 -0.9819 -0.2197 0.0199 ...
+ $ TimeGravityAccelerometerMagnitude.std..           : num  -0.7951 -0.9271 -0.9819 -0.2197 0.0199 ...
+ $ TimeBodyAccelerometerJerkMagnitude.std..          : num  -0.9282 -0.9841 -0.9931 -0.0745 -0.0258 ...
+ $ TimeBodyGyroscopeMagnitude.std..                  : num  -0.819 -0.935 -0.979 -0.187 -0.226 ...
+ $ TimeBodyGyroscopeJerkMagnitude.std..              : num  -0.936 -0.988 -0.995 -0.325 -0.307 ...
+ $ FrequencyBodyAccelerometer.std...X                : num  -0.9244 -0.9764 -0.996 -0.3191 0.0243 ...
+ $ FrequencyBodyAccelerometer.std...Y                : num  -0.834 -0.917 -0.972 0.056 -0.113 ...
+ $ FrequencyBodyAccelerometer.std...Z                : num  -0.813 -0.934 -0.978 -0.28 -0.298 ...
+ $ FrequencyBodyAccelerometerJerk.std...X            : num  -0.9642 -0.9875 -0.9951 -0.1336 -0.0863 ...
+ $ FrequencyBodyAccelerometerJerk.std...Y            : num  -0.932 -0.983 -0.987 0.107 -0.135 ...
+ $ FrequencyBodyAccelerometerJerk.std...Z            : num  -0.961 -0.988 -0.992 -0.535 -0.402 ...
+ $ FrequencyBodyGyroscope.std...X                    : num  -0.882 -0.978 -0.987 -0.517 -0.495 ...
+ $ FrequencyBodyGyroscope.std...Y                    : num  -0.9512 -0.9623 -0.9871 -0.0335 -0.1814 ...
+ $ FrequencyBodyGyroscope.std...Z                    : num  -0.917 -0.944 -0.982 -0.437 -0.238 ...
+ $ FrequencyBodyAccelerometerMagnitude.std..         : num  -0.798 -0.928 -0.982 -0.398 -0.187 ...
+ $ FrequencyBodyAccelerometerJerkMagnitude.std..     : num  -0.922 -0.982 -0.993 -0.103 -0.104 ...
+ $ FrequencyBodyGyroscopeMagnitude.std..             : num  -0.824 -0.932 -0.978 -0.321 -0.398 ...
+ $ FrequencyBodyGyroscopeJerkMagnitude.std..         : num  -0.933 -0.987 -0.995 -0.382 -0.392 ...
+ - attr(*, "vars")= chr "subject"
+ - attr(*, "drop")= logi TRUE
+
+
+Take a look at final data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+![2021 10 04-03_24_41](https://user-images.githubusercontent.com/85416661/135785073-3de0bdeb-b454-4874-a375-c9c0cb8fe905.png)
